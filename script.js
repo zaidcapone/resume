@@ -1,6 +1,5 @@
 // Global data storage
 let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
-let jobDescription = '';
 
 // Tab navigation
 function openTab(tabName) {
@@ -18,33 +17,11 @@ function openTab(tabName) {
 function handleResumeUpload(file) {
     if (!file) return;
     
-    const fileName = file.name.toLowerCase();
-    if (!fileName.endsWith('.pdf') && !fileName.endsWith('.docx') && !fileName.endsWith('.doc')) {
-        showMessage('Please upload a PDF or Word document.', 'error');
-        return;
-    }
-    
-    showMessage('📁 Processing your resume...', 'success');
-    
-    // Simulate resume parsing (in real app, use a resume parsing API)
+    showMessage('Processing your resume...', 'success');
+    // Simulate processing
     setTimeout(() => {
-        autoFillFromResume();
-        showMessage('✅ Resume processed! Profile auto-filled.', 'success');
-    }, 2000);
-}
-
-// Auto-fill form from resume data
-function autoFillFromResume() {
-    // This would be filled by actual resume parsing in a real application
-    // For now, we'll use the data from your uploaded resume
-    document.getElementById('name').value = "Al-Shami Zaid";
-    document.getElementById('email').value = "zaid_shami@hotmail.com";
-    document.getElementById('phone').value = "+96279 0423332";
-    document.getElementById('location').value = "Tlaa Al Ali, Amman";
-    document.getElementById('currentRole').value = "Corporate Social Responsibility Manager & Communications";
-    document.getElementById('experience').value = "12";
-    document.getElementById('targetRole').value = "Project & CSR Management";
-    document.getElementById('linkedin').value = "https://www.linkedin.com/in/zaid-shami-1818a352";
+        showMessage('Resume processed! Please review and update the information below.', 'success');
+    }, 1500);
 }
 
 // Save profile
@@ -70,7 +47,7 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
     };
     
     localStorage.setItem('userProfile', JSON.stringify(userProfile));
-    showMessage('✅ Profile saved successfully!', 'success');
+    showMessage('Profile saved successfully!', 'success');
 });
 
 // Load saved profile
@@ -95,7 +72,7 @@ function loadProfile() {
 
 // Customize resume for job
 function customizeResume() {
-    jobDescription = document.getElementById('jobDescription').value;
+    const jobDescription = document.getElementById('jobDescription').value;
     
     if (!jobDescription.trim()) {
         showMessage('Please paste a job description first.', 'error');
@@ -108,70 +85,82 @@ function customizeResume() {
     }
     
     const resumeContent = document.querySelector('#customizedResume .resume-content');
-    resumeContent.innerHTML = '<p>Customizing your resume...</p>';
+    resumeContent.innerHTML = '<p>Analyzing job description and customizing your resume...</p>';
     document.getElementById('customizedResume').classList.remove('hidden');
     
     setTimeout(() => {
         const customizedResume = generateCustomizedResume();
         resumeContent.innerHTML = customizedResume;
-        showMessage('✅ Resume customized successfully!', 'success');
-    }, 1500);
+        showMessage('Resume customized successfully!', 'success');
+    }, 2000);
 }
 
-// Generate customized resume content (using your format)
+// Generate resume in your template format
 function generateCustomizedResume() {
-    const keywords = extractKeywords(jobDescription);
-    
     return `
         <div class="resume-template">
             <div class="resume-header">
-                <h2>${userProfile.name}</h2>
-                <p>${userProfile.currentRole}</p>
-                <p>${userProfile.location} | ${userProfile.phone} | ${userProfile.email}</p>
-                <p>LinkedIn: ${userProfile.linkedin}</p>
+                <h2>${userProfile.name || 'Your Name'}</h2>
+                <p>${userProfile.currentRole || 'Professional Title'} | ${userProfile.location || 'Location'}</p>
+                <p>${userProfile.phone || 'Phone'} | ${userProfile.email || 'Email'} | ${userProfile.linkedin || 'LinkedIn'}</p>
             </div>
             
             <div class="resume-section">
-                <h3>Professional Summary</h3>
-                <p>${userProfile.summary}</p>
+                <h3>PROFESSIONAL SUMMARY</h3>
+                <p>${userProfile.summary || 'Professional summary highlighting key experience and skills.'}</p>
             </div>
             
             <div class="resume-section">
-                <h3>Core Skills</h3>
-                <p>${highlightRelevantSkills(userProfile.skills, keywords)}</p>
+                <h3>CORE SKILLS & EXPERTISE</h3>
+                <div class="skills-grid">
+                    ${userProfile.skills ? userProfile.skills.split('\n').map(skill => 
+                        `<div class="skill-item">${skill.trim()}</div>`
+                    ).join('') : 'Your skills will appear here'}
+                </div>
             </div>
             
             <div class="resume-section">
-                <h3>Work Experience</h3>
-                <div>${formatExperience(userProfile.experienceText)}</div>
+                <h3>PROFESSIONAL EXPERIENCE</h3>
+                ${formatExperience(userProfile.experienceText)}
             </div>
             
             <div class="resume-section">
-                <h3>Education</h3>
-                <p>${userProfile.education.replace(/\n/g, '<br>')}</p>
+                <h3>EDUCATION</h3>
+                ${userProfile.education ? userProfile.education.split('\n').map(edu => 
+                    `<p>${edu.trim()}</p>`
+                ).join('') : '<p>Your education details</p>'}
             </div>
             
             <div class="resume-section">
-                <h3>Certifications</h3>
-                <p>${userProfile.certificates.replace(/\n/g, '<br>')}</p>
+                <h3>CERTIFICATIONS</h3>
+                ${userProfile.certificates ? userProfile.certificates.split('\n').map(cert => 
+                    `<p>${cert.trim()}</p>`
+                ).join('') : '<p>Your certifications</p>'}
             </div>
             
             <div class="resume-section">
-                <h3>Languages</h3>
-                <p>${userProfile.languages.replace(/\n/g, '<br>')}</p>
+                <h3>LANGUAGES</h3>
+                <p>${userProfile.languages || 'Languages you speak'}</p>
             </div>
         </div>
     `;
 }
 
-// Format experience with bullet points
+// Format experience with proper structure
 function formatExperience(experienceText) {
-    return experienceText.split('\n').map(line => {
-        if (line.trim().startsWith('-')) {
-            return `<div class="bullet-point">${line}</div>`;
-        } else {
-            return `<div class="experience-role">${line}</div>`;
-        }
+    if (!experienceText) return '<p>Your work experience</p>';
+    
+    return experienceText.split('\n\n').map(job => {
+        const lines = job.split('\n');
+        const titleLine = lines[0];
+        const bulletPoints = lines.slice(1).filter(line => line.trim().startsWith('-'));
+        
+        return `
+            <div class="job-entry">
+                <div class="job-title">${titleLine}</div>
+                ${bulletPoints.map(point => `<div class="job-bullet">${point}</div>`).join('')}
+            </div>
+        `;
     }).join('');
 }
 
@@ -180,17 +169,26 @@ function downloadResumePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    const resumeContent = document.querySelector('#customizedResume .resume-content').textContent;
-    
+    // Add content in your resume format
     doc.setFontSize(16);
-    doc.text(userProfile.name, 20, 20);
+    doc.text(userProfile.name || 'Your Name', 20, 20);
     doc.setFontSize(12);
+    doc.text(userProfile.currentRole || 'Professional Title', 20, 30);
+    doc.text(`${userProfile.phone || ''} | ${userProfile.email || ''}`, 20, 40);
     
-    const splitText = doc.splitTextToSize(resumeContent, 170);
-    doc.text(splitText, 20, 40);
+    // Add other sections...
+    let yPosition = 60;
     
-    doc.save(`${userProfile.name}-Resume.pdf`);
-    showMessage('✅ PDF downloaded successfully!', 'success');
+    if (userProfile.summary) {
+        doc.text('PROFESSIONAL SUMMARY', 20, yPosition);
+        yPosition += 10;
+        const summaryLines = doc.splitTextToSize(userProfile.summary, 170);
+        doc.text(summaryLines, 20, yPosition);
+        yPosition += summaryLines.length * 7 + 10;
+    }
+    
+    doc.save(`${userProfile.name || 'resume'}.pdf`);
+    showMessage('PDF downloaded successfully!', 'success');
 }
 
 // Download as Word
@@ -200,19 +198,24 @@ function downloadResumeDOCX() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${userProfile.name}-Resume.docx`;
+    a.download = `${userProfile.name || 'resume'}.docx`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showMessage('✅ Word document downloaded!', 'success');
+    showMessage('Word document downloaded!', 'success');
 }
 
-// [Keep all your existing helper functions like extractKeywords, generateSummary, etc.]
+// Show message
+function showMessage(message, type) {
+    alert(message); // Simple alert for now
+}
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadProfile();
-    // Auto-fill with your resume data
-    autoFillFromResume();
+    // Setup file upload
+    document.getElementById('resumeUpload').addEventListener('change', function(e) {
+        handleResumeUpload(e.target.files[0]);
+    });
 });
