@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Resume Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -22,44 +24,95 @@
         <!-- Profile Tab -->
         <div id="profile" class="tab-content active">
             <h2>Build Your Professional Profile</h2>
-            <form id="profileForm">
-                <div class="form-columns">
-                    <div class="column">
-                        <label>Full Name*</label>
-                        <input type="text" id="name" required>
-                        
-                        <label>Email*</label>
-                        <input type="email" id="email" required>
-                        
-                        <label>Phone</label>
-                        <input type="tel" id="phone">
+            
+            <!-- Resume Upload Section -->
+            <div class="upload-section">
+                <h3>📁 Upload Your Resume (Optional)</h3>
+                <input type="file" id="resumeUpload" accept=".pdf,.docx,.doc" onchange="handleResumeUpload(this.files[0])">
+                <p class="upload-note">Upload PDF or Word document to auto-fill your information</p>
+            </div>
+
+            <div class="form-section">
+                <h3>Or Fill Manually</h3>
+                <form id="profileForm">
+                    <div class="form-columns">
+                        <div class="column">
+                            <label>Full Name*</label>
+                            <input type="text" id="name" required value="Al-Shami Zaid">
+                            
+                            <label>Email*</label>
+                            <input type="email" id="email" required value="zaid_shami@hotmail.com">
+                            
+                            <label>Phone*</label>
+                            <input type="tel" id="phone" required value="+96279 0423332">
+                            
+                            <label>Location</label>
+                            <input type="text" id="location" value="Tlaa Al Ali, Amman">
+                        </div>
+                        <div class="column">
+                            <label>Current Role*</label>
+                            <input type="text" id="currentRole" required value="Corporate Social Responsibility Manager & Communications">
+                            
+                            <label>Years of Experience*</label>
+                            <input type="number" id="experience" min="0" required value="12">
+                            
+                            <label>Target Role</label>
+                            <input type="text" id="targetRole" value="Project & CSR Management">
+                            
+                            <label>LinkedIn</label>
+                            <input type="url" id="linkedin" value="https://www.linkedin.com/in/zaid-shami-1818a352">
+                        </div>
                     </div>
-                    <div class="column">
-                        <label>Current Role*</label>
-                        <input type="text" id="currentRole" required>
-                        
-                        <label>Years of Experience</label>
-                        <input type="number" id="experience" min="0">
-                        
-                        <label>Target Role</label>
-                        <input type="text" id="targetRole">
-                    </div>
-                </div>
 
-                <label>Skills (one per line)*</label>
-                <textarea id="skills" placeholder="Python&#10;Project Management&#10;Data Analysis" required></textarea>
+                    <label>Professional Summary</label>
+                    <textarea id="summary" required>A professional humanitarian and development worker with 12 years of experience in post-emergency response and support for war-affected populations. I hold a bachelor's degree in Management Information Systems and began my career in the humanitarian field in 2013.</textarea>
 
-                <label>Professional Experience*</label>
-                <textarea id="experienceText" placeholder="• Senior Developer at ABC Corp (2020-2023)&#10;• Led team of 5 developers" required></textarea>
+                    <label>Skills (one per line)*</label>
+                    <textarea id="skills" required>Project Planning
+Budget Management
+Operations Management
+Business Development
+Account Management
+Operational Excellence
+Problem Solving
+Leadership Communication
+Risk Management
+Project Implementation
+Project Coordination
+Humanitarian Assistance
+Microsoft Office
+Microsoft Project
+Project Management Tools</textarea>
 
-                <label>Education</label>
-                <textarea id="education" placeholder="• MBA, Harvard University&#10;• BSc Computer Science"></textarea>
+                    <label>Work Experience*</label>
+                    <textarea id="experienceText" required>Corporate Social Responsibility Manager & Communications | Backaldrin | Mar 2025 – Present
+- Developed and launched Backaldrin's first CSR and communications strategy
+- Led initiatives on food security, youth training, and refugee support
+- Built partnerships with NGOs and community groups
 
-                <label>Certifications</label>
-                <textarea id="certificates" placeholder="• AWS Certified&#10;• PMP Certification"></textarea>
+Project Manager | Mateen World for Empowerment & Training | Mar 2023 – Mar 2025
+- Led four donor-funded projects across education, protection, WASH, and cash assistance
+- Managed budgets and ensured donor compliance
+- Oversaw project coordination and team leadership</textarea>
 
-                <button type="submit">Save Profile</button>
-            </form>
+                    <label>Education*</label>
+                    <textarea id="education" required>BS Management Information Systems | Applied Science University | 2008-2012
+Volunteer work & NGOs Management Diploma | German Jordanian University | 2015</textarea>
+
+                    <label>Certifications</label>
+                    <textarea id="certificates">PMD Pro Level 1 | APMG International
+Strategies for Online Teaching and Learning | edX
+Designing and Developing Online Course | edX
+Education in Emergencies Fundamentals | Save the Children
+Gender based violence (GBV) training | AIDOS</textarea>
+
+                    <label>Languages</label>
+                    <textarea id="languages">Arabic (Native)
+English (Professional Working)</textarea>
+
+                    <button type="submit">Save Profile</button>
+                </form>
+            </div>
         </div>
 
         <!-- Job Matching Tab -->
@@ -72,7 +125,10 @@
             <div id="customizedResume" class="resume-preview hidden">
                 <h3>Customized Resume</h3>
                 <div class="resume-content"></div>
-                <button onclick="downloadResume()">📄 Download Resume</button>
+                <div class="download-options">
+                    <button onclick="downloadResumePDF()">📄 Download as PDF</button>
+                    <button onclick="downloadResumeDOCX()">📝 Download as Word</button>
+                </div>
             </div>
         </div>
 
@@ -89,7 +145,10 @@
                 <div id="coverLetterOutput" class="export-output hidden">
                     <h3>Cover Letter</h3>
                     <div class="content"></div>
-                    <button onclick="downloadCoverLetter()">📝 Download Cover Letter</button>
+                    <div class="download-options">
+                        <button onclick="downloadCoverLetterPDF()">📄 PDF</button>
+                        <button onclick="downloadCoverLetterDOCX()">📝 Word</button>
+                    </div>
                 </div>
                 
                 <div id="emailOutput" class="export-output hidden">
