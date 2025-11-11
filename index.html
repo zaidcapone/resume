@@ -224,6 +224,96 @@
                 }, 3000);
             }
         });
+
+        const API_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'; // Replace with your URL
+
+// Real AI Analysis
+async function analyzeJobMatch() {
+    const jobDesc = document.getElementById('jobDescription').value;
+    if (!jobDesc) {
+        alert('Please paste a job description first');
+        return;
+    }
+
+    // Show loading
+    document.getElementById('matchResults').classList.remove('hidden');
+    document.getElementById('matchResults').innerHTML = `
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <span class="text-gray-600">AI is analyzing your resume...</span>
+        </div>
+    `;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'analyzeResume',
+                resumeText: "User's resume content", // You'll need to capture this
+                jobDescription: jobDesc
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayMatchResults(result.analysis);
+        } else {
+            throw new Error(result.error);
+        }
+    } catch (error) {
+        document.getElementById('matchResults').innerHTML = `
+            <div class="text-red-600">
+                Error: ${error.message}. Using demo data...
+            </div>
+        `;
+        // Fallback to demo data
+        displayDemoResults();
+    }
+}
+
+function displayMatchResults(analysis) {
+    document.getElementById('matchResults').innerHTML = `
+        <h4 class="font-semibold text-blue-800 mb-3">AI Match Analysis</h4>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <span class="text-sm text-gray-600">Overall Match</span>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                    <div class="bg-green-500 h-2 rounded-full" style="width: ${analysis.overallMatch}%"></div>
+                </div>
+                <span class="text-xs text-gray-500">${analysis.overallMatch}%</span>
+            </div>
+            <div>
+                <span class="text-sm text-gray-600">Skills Match</span>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                    <div class="bg-yellow-500 h-2 rounded-full" style="width: ${analysis.skillsMatch}%"></div>
+                </div>
+                <span class="text-xs text-gray-500">${analysis.skillsMatch}%</span>
+            </div>
+        </div>
+        <div class="bg-yellow-50 p-3 rounded-lg">
+            <h5 class="font-semibold text-yellow-800 mb-2">AI Recommendations</h5>
+            <ul class="text-sm text-yellow-700 list-disc list-inside">
+                ${analysis.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+}
+
+function displayDemoResults() {
+    // Demo data when API fails
+    displayMatchResults({
+        overallMatch: 85,
+        skillsMatch: 78,
+        recommendations: [
+            "Add more quantifiable achievements to your experience",
+            "Include keywords like 'project management' and 'team leadership'",
+            "Highlight specific metrics and results"
+        ]
+    });
+}
+        
     </script>
 
     <style>
