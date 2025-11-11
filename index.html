@@ -1,1 +1,106 @@
-# resume
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 AI Resume Dashboard</h1>
+            <p>Customize your resume for any job application</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab('profile')">📝 Your Profile</button>
+            <button class="tab-button" onclick="openTab('job')">💼 Job Matching</button>
+            <button class="tab-button" onclick="openTab('export')">📤 Export</button>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="profile" class="tab-content active">
+            <h2>Build Your Professional Profile</h2>
+            <form id="profileForm">
+                <div class="form-columns">
+                    <div class="column">
+                        <label>Full Name*</label>
+                        <input type="text" id="name" required>
+                        
+                        <label>Email*</label>
+                        <input type="email" id="email" required>
+                        
+                        <label>Phone</label>
+                        <input type="tel" id="phone">
+                    </div>
+                    <div class="column">
+                        <label>Current Role*</label>
+                        <input type="text" id="currentRole" required>
+                        
+                        <label>Years of Experience</label>
+                        <input type="number" id="experience" min="0">
+                        
+                        <label>Target Role</label>
+                        <input type="text" id="targetRole">
+                    </div>
+                </div>
+
+                <label>Skills (one per line)*</label>
+                <textarea id="skills" placeholder="Python&#10;Project Management&#10;Data Analysis" required></textarea>
+
+                <label>Professional Experience*</label>
+                <textarea id="experienceText" placeholder="• Senior Developer at ABC Corp (2020-2023)&#10;• Led team of 5 developers" required></textarea>
+
+                <label>Education</label>
+                <textarea id="education" placeholder="• MBA, Harvard University&#10;• BSc Computer Science"></textarea>
+
+                <label>Certifications</label>
+                <textarea id="certificates" placeholder="• AWS Certified&#10;• PMP Certification"></textarea>
+
+                <button type="submit">Save Profile</button>
+            </form>
+        </div>
+
+        <!-- Job Matching Tab -->
+        <div id="job" class="tab-content">
+            <h2>Job Matching</h2>
+            <label>Paste Job Description*</label>
+            <textarea id="jobDescription" placeholder="Paste the job description here..." required></textarea>
+            <button onclick="customizeResume()">Customize My Resume</button>
+            
+            <div id="customizedResume" class="resume-preview hidden">
+                <h3>Customized Resume</h3>
+                <div class="resume-content"></div>
+                <button onclick="downloadResume()">📄 Download Resume</button>
+            </div>
+        </div>
+
+        <!-- Export Tab -->
+        <div id="export" class="tab-content">
+            <h2>Export Options</h2>
+            <div class="export-options">
+                <label><input type="checkbox" id="coverLetter"> Generate Cover Letter</label>
+                <label><input type="checkbox" id="draftEmail"> Prepare Draft Email</label>
+            </div>
+            <button onclick="generateExports()">Generate Selected Exports</button>
+            
+            <div id="exportResults" class="hidden">
+                <div id="coverLetterOutput" class="export-output hidden">
+                    <h3>Cover Letter</h3>
+                    <div class="content"></div>
+                    <button onclick="downloadCoverLetter()">📝 Download Cover Letter</button>
+                </div>
+                
+                <div id="emailOutput" class="export-output hidden">
+                    <h3>Draft Email</h3>
+                    <div class="content"></div>
+                    <button onclick="copyEmail()">📧 Copy Email to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
